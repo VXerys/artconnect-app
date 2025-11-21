@@ -29,19 +29,19 @@
       <div class="grid grid-cols-1 gap-5 mb-8 sm:grid-cols-3">
         <StatsCard
           title="Total Sales"
-          value="$25,450"
+          :value="formatCurrency(analyticsStore.dashboardStats.totalSales)"
           change="+15%"
           changeType="positive"
         />
         <StatsCard
           title="Average Sale Value"
-          value="$1,272.50"
+          :value="formatCurrency(analyticsStore.dashboardStats.averageSaleValue)"
           change="+8%"
           changeType="positive"
         />
         <StatsCard
           title="New Contacts"
-          value="15"
+          :value="analyticsStore.dashboardStats.newContacts.toString()"
           change="+20%"
           changeType="positive"
         />
@@ -51,14 +51,14 @@
       <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
         <div class="p-6 bg-white shadow rounded-2xl lg:col-span-2">
           <h2 class="mb-4 text-xl font-semibold text-gray-800">Sales Trends</h2>
-          <SalesChart />
+          <SalesChart :data="analyticsStore.salesTrend" />
         </div>
 
         <div class="p-6 bg-white shadow rounded-2xl">
           <h2 class="mb-4 text-xl font-semibold text-gray-800">
             Recent Artworks
           </h2>
-          <div v-if="artworksStore.loading">
+          <div v-if="artworksStore.loading && recentArtworks.length === 0">
             <Spinner class="w-8 h-8 mx-auto" />
           </div>
           <div
@@ -91,28 +91,21 @@
           <h2 class="mb-4 text-xl font-semibold text-gray-800">
             Activity Feed
           </h2>
-          <ul class="space-y-4">
+          <ul class="space-y-4" v-if="analyticsStore.activities.length > 0">
             <ActivityFeedItem
-              icon="💰"
-              text="Sold 'Abstract Landscape' to Olivia Bennett"
-              time="2 days ago"
-            />
-            <ActivityFeedItem
-              icon="✨"
-              text="Added new artwork 'Urban Sketch'"
-              time="1 week ago"
-            />
-            <ActivityFeedItem
-              icon="📞"
-              text="Contacted by potential buyer, Ethan Chen"
-              time="2 weeks ago"
+              v-for="(activity, index) in analyticsStore.activities"
+              :key="index"
+              :icon="activity.icon || '📝'"
+              :text="activity.text"
+              :time="activity.time"
             />
           </ul>
+           <p v-else class="text-sm text-gray-500">No recent activities.</p>
         </div>
 
         <div class="p-6 bg-white shadow rounded-2xl">
           <h2 class="mb-4 text-xl font-semibold text-gray-800">Key Contacts</h2>
-          <div v-if="contactsStore.loading">
+          <div v-if="contactsStore.loading && keyContacts.length === 0">
             <Spinner class="w-8 h-8 mx-auto" />
           </div>
           <ul v-else-if="keyContacts.length > 0" class="space-y-4">
@@ -136,6 +129,7 @@ import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useArtworksStore } from "@/stores/artworks";
 import { useContactsStore } from "@/stores/contacts";
+import { useAnalyticsStore } from "@/stores/analytics";
 import StatsCard from "@/modules/dashboard/components/StatsCard.vue";
 import SalesChart from "@/modules/dashboard/components/SalesChart.vue";
 import ActivityFeedItem from "@/modules/dashboard/components/ActivityFeedItem.vue";
@@ -148,6 +142,7 @@ const placeholderImage =
 const authStore = useAuthStore();
 const artworksStore = useArtworksStore();
 const contactsStore = useContactsStore();
+const analyticsStore = useAnalyticsStore();
 
 const userFirstName = computed(
   () =>
@@ -159,8 +154,18 @@ const userFirstName = computed(
 onMounted(() => {
   if (artworksStore.artworksList.length === 0) artworksStore.fetchArtworks();
   if (contactsStore.contactsList.length === 0) contactsStore.fetchContacts();
+  analyticsStore.fetchDashboardStats();
 });
 
 const recentArtworks = computed(() => artworksStore.artworksList.slice(0, 4));
 const keyContacts = computed(() => contactsStore.contactsList.slice(0, 5));
+
+const formatCurrency = (value) => {
+    if (value === undefined || value === null) return "$0";
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0
+    }).format(value);
+}
 </script>
