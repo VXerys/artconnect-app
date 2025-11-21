@@ -52,6 +52,10 @@
       </div>
 
       <div>
+        <!--
+          Tombol Login memanggil action dari authStore.
+          State loading dari store digunakan untuk menampilkan indikator loading.
+        -->
         <AppButton
           type="submit"
           variant="soft-green-primary"
@@ -74,7 +78,22 @@
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Placeholder SVG Google */}
+            <path
+              d="M43.611 20.083H42V20H24V28H35.303C33.654 32.657 29.227 36 24 36C17.373 36 12 30.627 12 24C12 17.373 17.373 12 24 12C27.059 12 29.842 13.154 31.961 15.039L37.618 9.382C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24C4 35.045 12.955 44 24 44C35.045 44 44 35.045 44 24C44 22.659 43.862 21.35 43.611 20.083Z"
+              fill="#FFC107"
+            />
+            <path
+              d="M6.306 14.691L12.877 19.51C14.655 15.108 18.961 12 24 12C27.059 12 29.842 13.154 31.961 15.039L37.618 9.382C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691Z"
+              fill="#FF3D00"
+            />
+            <path
+              d="M24 44C29.266 44 34.043 41.951 37.614 38.63L31.989 32.989C29.852 34.836 27.081 36 24 36C18.789 36 14.375 32.677 12.722 28.045L6.114 33.115C9.454 39.574 16.177 44 24 44Z"
+              fill="#4CAF50"
+            />
+            <path
+              d="M43.611 20.083H42V20H24V28H35.303C34.53 30.183 33.401 32.171 31.989 32.989L37.614 38.63C41.447 35.096 43.721 29.942 43.611 20.083Z"
+              fill="#1976D2"
+            />
           </svg>
           <span>Sign in with Google</span>
         </AppButton>
@@ -92,26 +111,35 @@
     </form>
   </div>
 </template>
+
 <script setup>
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import AppInput from "@/components/common/AppInput.vue";
 import AppButton from "@/components/common/AppButton.vue";
+
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
 const email = ref("");
 const password = ref("");
 const authError = ref(false);
+
+// Fungsi integrasi Login
 const handleLogin = async () => {
   authError.value = false;
   authStore.error = null;
   try {
+    // Memanggil action loginWithEmail dari Pinia Store
+    // Action ini akan menangani Firebase Login dan sinkronisasi profil Backend (jika ada)
     await authStore.loginWithEmail({
       email: email.value,
       password: password.value,
     });
+
+    // Redirect setelah sukses
     const redirect = route.query.redirect || "/app/dashboard";
     router.push(redirect);
   } catch (error) {
