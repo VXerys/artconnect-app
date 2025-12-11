@@ -172,18 +172,24 @@ const handleVerify = async () => {
     return;
   }
 
+  const email = route.query.email;
+  if (!email) {
+    error.value = "Email parameter missing from navigation.";
+    return;
+  }
+
   loading.value = true;
   error.value = "";
   
   try {
-    await authStore.verifyOtp(code);
-    
     if (isSignup.value) {
-      // Flow Signup -> OTP -> Signup Success -> Dashboard
+      await authStore.verifyEmail(email, code);
       router.push({ name: 'SignupSuccess' });
     } else {
+      await authStore.verifyResetOtp(email, code);
       // Flow Forgot Password -> OTP -> Set New Password
-      router.push({ name: 'SetNewPassword' });
+      // Pass email and validated token/code to the next step
+      router.push({ name: 'SetNewPassword', query: { email, token: code } });
     }
 
   } catch (err) {

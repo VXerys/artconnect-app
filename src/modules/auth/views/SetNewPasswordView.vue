@@ -76,12 +76,13 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import AppInput from "@/components/common/AppInput.vue";
 import AppButton from "@/components/common/AppButton.vue";
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const password = ref("");
@@ -102,12 +103,25 @@ const handleSavePassword = async () => {
   if (passwordError.value || confirmPasswordError.value) return;
   if (!password.value) return;
 
+  const email = route.query.email;
+  const token = route.query.token;
+
+  if (!email || !token) {
+    // Should probably show visual error, but for now console error
+    console.error("Missing email or token for password reset");
+    // Optionally redirect back or show error toast
+    return;
+  }
+
   try {
-    // Call dummy update action
-    await authStore.updatePassword(password.value);
+    await authStore.updatePassword({
+      email,
+      resetToken: token,
+      newPassword: password.value,
+      confirmPassword: confirmPassword.value
+    });
     
     // Success flow
-    // alert("Password successfully reset! You can now login."); // Removed alert
     router.push({ name: 'PasswordChanged' });
   } catch (err) {
     console.error("Failed to update password:", err);

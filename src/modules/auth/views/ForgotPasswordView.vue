@@ -104,7 +104,7 @@ const handleReset = async () => {
   try {
     await authStore.resetPassword(email.value);
     // successMessage.value = "Link reset password terkirim! Cek email Anda."; // Old message
-    router.push({ name: 'OtpVerification' });
+    router.push({ name: 'OtpVerification', query: { email: email.value } });
   } catch (error) {
     console.error("Password reset failed:", error);
   } finally {

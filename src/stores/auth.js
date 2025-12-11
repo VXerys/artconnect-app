@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-// import axiosClient from "@/api/axiosClient"; // Commented out for dummy mode
+import axiosClient from "@/api/axiosClient";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -14,34 +14,26 @@ export const useAuthStore = defineStore("auth", {
     token: (s) => s.jwtToken,
   },
   actions: {
-    // --- DUMMY IMPLEMENTATIONS FOR UI SLICING ---
-
     async registerUser(creds) {
       this.loading = true;
       this.error = null;
-      console.log("Mock Register initiating...", creds);
-      
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Mock successful response
-        const dummyUser = {
-          id: "dummy-user-" + Date.now(),
+        const payload = {
+          fullName: creds.fullName || creds.name, // Ensure field alignment
           email: creds.email,
-          name: creds.displayName || creds.email.split("@")[0],
-          role: "artist",
-          avatar: "https://i.pravatar.cc/150?u=" + creds.email
+          password: creds.password,
+          confirmPassword: creds.confirmPassword || creds.password // Handle if confirm missing
         };
-        const dummyToken = "dummy-jwt-token-" + Date.now();
-
-        this.setSession(dummyToken, dummyUser);
-        console.log("Mock Register success!", dummyUser);
-
+        const response = await axiosClient.post("/auth/register", payload);
+        
+        // If auto-login or return user data:
+        // this.setSession(response.data.token, response.data.user);
+        
+        return response.data;
       } catch (e) {
-        console.error("Mock Register failed:", e);
-        this.error = e.message;
-        throw e;
+        console.error("Register failed:", e);
+        this.error = e.response?.data?.error || e.message;
+        throw e; // Rethrow so UI can handle
       } finally {
         this.loading = false;
       }
@@ -50,33 +42,19 @@ export const useAuthStore = defineStore("auth", {
     async loginWithEmail(creds) {
       this.loading = true;
       this.error = null;
-      console.log("Mock Login initiating...", creds);
-
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Simulate error for specific email if needed for testing (Optional)
-        if (creds.email === "fail@test.com") {
-           throw new Error("Invalid credentials (simulated)");
-        }
-
-        // Mock successful response
-        const dummyUser = {
-          id: "dummy-user-123",
+        const response = await axiosClient.post("/auth/login", {
           email: creds.email,
-          name: "Slicing Tester",
-          role: "collector",
-          avatar: "https://i.pravatar.cc/150?u=test"
-        };
-        const dummyToken = "dummy-jwt-token-ACCESS";
-
-        this.setSession(dummyToken, dummyUser);
-        console.log("Mock Login success!", dummyUser);
-
+          password: creds.password
+        });
+        
+        const { token, user } = response.data;
+        this.setSession(token, user);
+        
+        return user;
       } catch (e) {
-        console.error("Mock Login failed:", e);
-        this.error = e.message;
+        console.error("Login failed:", e);
+        this.error = e.response?.data?.error || e.message;
         throw e;
       } finally {
         this.loading = false;
@@ -84,58 +62,60 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async logout() {
-      this.loading = true;
-      this.error = null;
-      console.log("Mock Logout...");
-      
-      try {
-         await new Promise(resolve => setTimeout(resolve, 500));
-      } finally {
-        this.clearSession();
-        this.loading = false;
-        console.log("Mock Logout done");
-      }
+      // Backend stateless JWT usually just needs client-side cleanup
+      this.clearSession();
     },
 
     async resetPassword(email) {
       this.error = null;
-      console.log("Mock Reset Password for:", email);
-      
       try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        // Success
-        console.log("Mock Reset Password email sent");
+        await axiosClient.post("/auth/forgot-password", { email });
       } catch (e) {
-        this.error = e.message;
+        this.error = e.response?.data?.error || e.message;
         throw e;
       }
     },
 
-    // Include dummy OTP method if needed by UI
-    async verifyOtp(otpCode) {
+    async verifyEmail(email, code) { 
         this.loading = true;
         try {
-            console.log("Mock Verify OTP:", otpCode);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            if (otpCode === "000000") throw new Error("Invalid OTP (Simulated)");
+            await axiosClient.post("/auth/verify-email", { 
+               email: email, 
+               verificationCode: code 
+            });
             return true;
         } catch(e) {
-            this.error = e.message;
+            this.error = e.response?.data?.error || e.message;
             throw e;
         } finally {
             this.loading = false;
         }
     },
 
-    async updatePassword(newPassword) {
+    async verifyResetOtp(email, code) { 
+        this.loading = true;
+        try {
+            await axiosClient.post("/auth/verify-otp", { 
+               email: email, 
+               otp: code 
+            });
+            return true; 
+        } catch(e) {
+            this.error = e.response?.data?.error || e.message;
+            throw e;
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    async updatePassword(payload) { // payload: { email, resetToken, newPassword, confirmPassword }
       this.loading = true;
       this.error = null;
       try {
-        console.log("Mock Update Password:", newPassword);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        // Success
+        // Assuming this is for Reset Password flow
+        await axiosClient.post("/auth/reset-password", payload);
       } catch (e) {
-        this.error = e.message;
+        this.error = e.response?.data?.error || e.message;
         throw e;
       } finally {
         this.loading = false;
@@ -144,7 +124,7 @@ export const useAuthStore = defineStore("auth", {
 
     async checkAuth() {
       const token = localStorage.getItem("jwtToken");
-      console.log("Mock Check Auth, token:", token);
+      const userStr = localStorage.getItem("user");
       
       if (!token) {
         this.user = null;
@@ -152,39 +132,31 @@ export const useAuthStore = defineStore("auth", {
         return;
       }
       
-      this.loading = true;
-      try {
-        // Simulate validating token
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Restore session with dummy user
-        this.user = {
-          id: "dummy-user-restored",
-          email: "restored@example.com",
-          name: "Restored User",
-          role: "viewer",
-          avatar: "https://i.pravatar.cc/150?u=restored"
-        };
-        this.jwtToken = token;
-        
-      } catch (e) {
-        console.warn("Mock Session invalid:", e);
-        this.clearSession();
-      } finally {
-        this.loading = false;
+      // If we had a /me endpoint, we would call it here.
+      // For now, we restore from localStorage if available
+      if (userStr) {
+          try {
+              this.user = JSON.parse(userStr);
+              this.jwtToken = token;
+          } catch(e) {
+              this.clearSession();
+          }
       }
+      this.loading = false;
     },
 
     setSession(token, user) {
       this.jwtToken = token;
       this.user = user;
       localStorage.setItem("jwtToken", token);
+      localStorage.setItem("user", JSON.stringify(user));
     },
 
     clearSession() {
       this.jwtToken = null;
       this.user = null;
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("user");
     }
   },
 });

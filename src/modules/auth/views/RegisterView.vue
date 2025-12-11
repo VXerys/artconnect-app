@@ -6,8 +6,8 @@
     <form @submit.prevent="handleRegister" class="space-y-3">
       <AppInput
         label="Full Name"
-        name="displayName"
-        v-model="displayName"
+        name="fullName"
+        v-model="fullName"
         placeholder="Sehan Alfarisi"
         autocomplete="name"
         inputClass="rounded-full px-4 py-2.5 border-gray-300"
@@ -64,7 +64,7 @@
       </div>
 
       <p
-        v-if="authStore.error && !authStore.error.includes('email')"
+        v-if="authStore.error && !emailError"
         class="text-sm text-red-600"
       >
         {{ authStore.error }}
@@ -143,16 +143,18 @@ import AppButton from "@/components/common/AppButton.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const displayName = ref("");
+const fullName = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 
-const emailError = computed(() =>
-  authStore.error?.includes("email-already-in-use")
-    ? "Email already in use."
-    : ""
-);
+const emailError = computed(() => {
+  const err = authStore.error?.toLowerCase() || "";
+  return err.includes("email is already registered") ||
+         err.includes("email already in use")
+    ? "Email is already registered."
+    : "";
+});
 
 const passwordError = computed(() => {
   if (password.value && password.value.length < 6)
@@ -173,9 +175,10 @@ const handleRegister = async () => {
     await authStore.registerUser({
       email: email.value,
       password: password.value,
-      displayName: displayName.value,
+      fullName: fullName.value,
+      confirmPassword: confirmPassword.value,
     });
-    router.push({ name: "SignupVerification" });
+    router.push({ name: "SignupVerification", query: { email: email.value } });
   } catch (error) {
     console.error("Registration failed:", error);
   }
