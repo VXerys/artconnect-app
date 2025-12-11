@@ -1,16 +1,16 @@
 <template>
   <div class="w-full max-w-md mx-auto">
-    <h2 class="mb-2 text-3xl font-bold text-gray-800">Get Started Now</h2>
-    <p class="mb-8 text-sm text-gray-500">Let's create your account</p>
+    <h2 class="mb-1 text-3xl font-bold text-gray-800">Get Started Now</h2>
+    <p class="mb-6 text-sm text-gray-500">Let's create your account</p>
 
-    <form @submit.prevent="handleRegister" class="space-y-5">
+    <form @submit.prevent="handleRegister" class="space-y-3">
       <AppInput
         label="Full Name"
         name="displayName"
         v-model="displayName"
         placeholder="Sehan Alfarisi"
         autocomplete="name"
-        inputClass="rounded-full px-5 py-3 border-gray-300"
+        inputClass="rounded-full px-4 py-2.5 border-gray-300"
       />
       <AppInput
         label="Email"
@@ -20,7 +20,7 @@
         required
         placeholder="sehanf@example.com"
         autocomplete="email"
-        inputClass="rounded-full px-5 py-3 border-gray-300"
+        inputClass="rounded-full px-4 py-2.5 border-gray-300"
         :error="emailError"
       />
       <AppInput
@@ -31,7 +31,7 @@
         required
         placeholder="Set your password"
         autocomplete="new-password"
-        inputClass="rounded-full px-5 py-3 border-gray-300"
+        inputClass="rounded-full px-4 py-2.5 border-gray-300"
         :error="passwordError"
       />
       <AppInput
@@ -42,7 +42,7 @@
         required
         placeholder="Confirm your password"
         autocomplete="new-password"
-        inputClass="rounded-full px-5 py-3 border-gray-300"
+        inputClass="rounded-full px-4 py-2.5 border-gray-300"
         :error="passwordError"
       />
 
@@ -74,7 +74,7 @@
         <AppButton
           type="submit"
           variant="soft-green-primary"
-          class="w-full rounded-full py-3"
+          class="w-full rounded-full py-2.5"
           :loading="authStore.loading"
         >
           Sign up
@@ -82,7 +82,7 @@
       </div>
 
       <!-- Divider -->
-      <div class="flex items-center my-4">
+      <div class="flex items-center my-3">
         <div class="flex-grow border-t border-gray-300"></div>
         <span class="mx-4 text-sm text-gray-500">or</span>
         <div class="flex-grow border-t border-gray-300"></div>
@@ -93,7 +93,7 @@
         <AppButton
           type="button"
           variant="soft-green-outline"
-          class="flex items-center justify-center w-full space-x-2 rounded-full py-3"
+          class="flex items-center justify-center w-full space-x-2 rounded-full py-2.5"
         >
           <svg
             class="w-5 h-5"
@@ -123,7 +123,7 @@
       </div>
     </form>
 
-    <p class="mt-8 text-sm text-center text-gray-600">
+    <p class="mt-6 text-sm text-center text-gray-600">
       Already have an account?
       <router-link
         :to="{ name: 'Login' }"
@@ -175,7 +175,7 @@ const handleRegister = async () => {
       password: password.value,
       displayName: displayName.value,
     });
-    router.push({ name: "Dashboard" });
+    router.push({ name: "SignupVerification" });
   } catch (error) {
     console.error("Registration failed:", error);
   }

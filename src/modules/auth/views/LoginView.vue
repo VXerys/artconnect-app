@@ -1,9 +1,9 @@
 <template>
   <div class="w-full max-w-md mx-auto">
-    <h2 class="mb-2 text-3xl font-bold text-gray-800">Welcome Back</h2>
-    <p class="mb-8 text-sm text-gray-500">Sign in to your account</p>
+    <h2 class="mb-1 text-3xl font-bold text-gray-800">Welcome Back</h2>
+    <p class="mb-6 text-sm text-gray-500">Sign in to your account</p>
 
-    <form @submit.prevent="handleLogin" class="space-y-5">
+    <form @submit.prevent="handleLogin" class="space-y-4">
       <AppInput
         label="Email"
         name="email"
@@ -68,7 +68,7 @@
         </AppButton>
       </div>
 
-      <div class="flex items-center my-4">
+      <div class="flex items-center my-3">
         <div class="flex-grow border-t border-gray-300"></div>
         <span class="mx-4 text-sm text-gray-500">or</span>
         <div class="flex-grow border-t border-gray-300"></div>
@@ -107,7 +107,7 @@
         </AppButton>
       </div>
 
-      <p class="mt-8 text-sm text-center text-gray-600">
+      <p class="mt-6 text-sm text-center text-gray-600">
         Don't have an account?
         <router-link
           :to="{ name: 'Register' }"

@@ -31,9 +31,7 @@ stores/
 
 ---
 
-## 🚀 Setup Pinia (Future)
-
-**Note:** Saat ini ArtConnect menggunakan **composables** untuk state management. Upgrade ke Pinia jika state makin complex.
+## 🚀 Setup Pinia
 
 ### Installation
 
@@ -64,7 +62,7 @@ app.mount('#app')
 // stores/auth.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import authService from '@/services/firebase/auth'
+import axiosClient from "@/api/axiosClient"
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -74,16 +72,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters (computed)
   const isAuthenticated = computed(() => user.value !== null)
-  const userName = computed(() => user.value?.displayName || '')
+  const userName = computed(() => user.value?.name || '')
 
   // Actions
-  async function login() {
+  async function login(creds) {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authService.signInWithGoogle()
-      user.value = result.user
+      const response = await axiosClient.post('/auth/login', creds)
+      user.value = response.data.user
+      localStorage.setItem('jwtToken', response.data.token)
     } catch (err) {
       error.value = err.message
       throw err
@@ -93,8 +92,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    await authService.signOut()
-    user.value = null
+    try {
+      await axiosClient.post('/auth/logout')
+    } finally {
+      user.value = null
+      localStorage.removeItem('jwtToken')
+    }
   }
 
   return {
@@ -135,5 +138,3 @@ const authStore = useAuthStore()
 - **Pinia Docs:** https://pinia.vuejs.org/
 
 ---
-
-**Current approach:** Use composables (simpler). Migrate to Pinia later if needed.

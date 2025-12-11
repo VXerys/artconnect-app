@@ -19,7 +19,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 onMounted(() => {
-  authStore.monitorAuthState();
+  authStore.checkAuth();
 });
 
 const layoutComponent = computed(() => {

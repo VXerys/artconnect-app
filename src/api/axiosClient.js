@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '@/services/firebase';
+
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
@@ -10,15 +10,10 @@ const axiosClient = axios.create({
 
 // Request Interceptor: Attach Firebase ID Token
 axiosClient.interceptors.request.use(
-  async (config) => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
-      } catch (error) {
-        console.error('Error fetching ID token:', error);
-      }
+  (config) => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
