@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <h2 class="mb-2 text-2xl font-bold text-gray-900">Welcome Back</h2>
-    <p class="mb-6 text-sm text-gray-500">Sign in to your account</p>
+  <div class="w-full max-w-md mx-auto">
+    <h2 class="mb-2 text-3xl font-bold text-gray-800">Welcome Back</h2>
+    <p class="mb-8 text-sm text-gray-500">Sign in to your account</p>
 
-    <form @submit.prevent="handleLogin" class="space-y-6">
+    <form @submit.prevent="handleLogin" class="space-y-5">
       <AppInput
         label="Email"
         name="email"
@@ -12,6 +12,7 @@
         required
         autocomplete="email"
         placeholder="sehanaf@example.com"
+        inputClass="rounded-full px-5 py-3 border-gray-300"
         :error="
           authError
             ? 'Email atau password salah.'
@@ -28,6 +29,7 @@
         required
         autocomplete="current-password"
         placeholder="Enter your password"
+        inputClass="rounded-full px-5 py-3 border-gray-300"
         :error="authError ? ' ' : ''"
       />
 
@@ -37,7 +39,7 @@
             id="remember-me"
             name="remember-me"
             type="checkbox"
-            class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+            class="w-4 h-4 text-artconnect-soft-green border-gray-300 rounded focus:ring-artconnect-soft-green"
           />
           <label for="remember-me" class="block ml-2 text-gray-600">
             Remember me
@@ -47,11 +49,11 @@
           :to="{ name: 'ForgotPassword' }"
           class="font-medium text-gray-500 hover:text-gray-700"
         >
-          Forgot Password?
+          Forgot Password
         </router-link>
       </div>
 
-      <div>
+      <div class="pt-2">
         <!--
           Tombol Login memanggil action dari authStore.
           State loading dari store digunakan untuk menampilkan indikator loading.
@@ -59,18 +61,24 @@
         <AppButton
           type="submit"
           variant="soft-green-primary"
-          class="w-full"
+          class="w-full rounded-full py-3"
           :loading="authStore.loading"
         >
           Sign In
         </AppButton>
       </div>
 
+      <div class="flex items-center my-4">
+        <div class="flex-grow border-t border-gray-300"></div>
+        <span class="mx-4 text-sm text-gray-500">or</span>
+        <div class="flex-grow border-t border-gray-300"></div>
+      </div>
+
       <div>
         <AppButton
           type="button"
           variant="soft-green-outline"
-          class="flex items-center justify-center w-full space-x-2"
+          class="flex items-center justify-center w-full space-x-2 rounded-full py-3"
         >
           <svg
             class="w-5 h-5"
@@ -95,15 +103,15 @@
               fill="#1976D2"
             />
           </svg>
-          <span>Sign in with Google</span>
+          <span class="text-gray-600">Sign in with Google</span>
         </AppButton>
       </div>
 
-      <p class="mt-6 text-sm text-center text-gray-600">
+      <p class="mt-8 text-sm text-center text-gray-600">
         Don't have an account?
         <router-link
           :to="{ name: 'Register' }"
-          class="font-medium text-indigo-600 hover:text-indigo-500"
+          class="font-medium text-gray-900 hover:text-gray-700 underline decoration-gray-400 underline-offset-4"
         >
           Sign Up
         </router-link>
